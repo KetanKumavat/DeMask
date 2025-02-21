@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Power, Camera, AlertCircle, Video, Settings } from "lucide-react";
+import axios from "axios";
+import { cn } from "./utils.jsx";
 
 const App = () => {
     const [isEnabled, setIsEnabled] = useState(false);
@@ -7,6 +9,19 @@ const App = () => {
     const [frameCount, setFrameCount] = useState(0);
     const [isExtension, setIsExtension] = useState(false);
     const [showSettings, setShowSettings] = useState(false);
+    const [message, setMessage] = useState("");
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001");
+                setMessage(response.data);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+        fetchData();
+    }, []);
 
     useEffect(() => {
         const isRunningAsExtension =
@@ -33,10 +48,10 @@ const App = () => {
     const toggleExtension = () => {
         const newState = !isEnabled;
         setIsEnabled(newState);
+        setStatus(newState ? "capturing" : "idle");
 
         if (isExtension) {
             chrome.storage.local.set({ isEnabled: newState });
-
             chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                 if (tabs[0]?.id) {
                     chrome.tabs.sendMessage(tabs[0].id, {
@@ -44,104 +59,114 @@ const App = () => {
                     });
                 }
             });
-        } else {
-            console.log("Toggle state:", newState);
         }
-
-        setStatus(newState ? "capturing" : "idle");
     };
 
     return (
-        <div className="w-80 bg-gradient-to-b from-gray-50 to-white min-h-[400px] shadow-lg">
+        <div className="w-80 bg-gradient-to-b from-neutral-800/90 to-neutral-900/90 backdrop-blur-xl text-white min-h-[400px] shadow-2xl border border-neutral-700/50 p-4">
             {/* Header */}
-            <div className="bg-white p-4 border-b border-gray-100 flex justify-between items-center">
-                <div className="flex items-center space-x-2">
-                    <div className="bg-blue-50 p-2 rounded-lg">
-                        <Camera className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <h1 className="text-lg font-semibold text-gray-900">
-                        Frame Extractor
+            <div className="flex justify-center items-center border-b border-neutral-700/50 pb-4">
+                <div className="flex items-center justify-center space-x-2">
+                    <h1 className="text-white text-3xl text-center font-bold tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
+                        Deepfake ko pakdo
                     </h1>
                 </div>
-                <button
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="p-2 hover:bg-gray-50 rounded-full transition-colors"
-                >
-                    <Settings className="w-4 h-4 text-gray-500" />
-                </button>
             </div>
 
-            <div className="p-6 space-y-6">
-                {/* Development Mode Notice */}
+            <div className="py-6 space-y-6">
                 {!isExtension && (
-                    <div className="text-xs bg-amber-50 border border-amber-100 p-3 rounded-lg flex items-center space-x-2">
-                        <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0" />
-                        <span className="text-amber-700">
-                            Running in development mode
+                    <div className="text-xs bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg flex items-center space-x-2 transition-colors animate-pulse">
+                        <AlertCircle className="w-4 h-4 text-amber-500" />
+                        <span className="text-amber-200">
+                            Running in Dev Mode
                         </span>
                     </div>
                 )}
 
                 {/* Status Card */}
-                <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm space-y-4">
+                <div className="bg-black/20 backdrop-blur-sm p-5 rounded-xl border border-neutral-800 shadow-lg space-y-4 transition-all duration-200 hover:border-neutral-700">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-3">
                             <div
-                                className={`w-2 h-2 rounded-full ${
+                                className={cn(
+                                    "w-2.5 h-2.5 rounded-full transition-all duration-500",
                                     status === "capturing"
-                                        ? "bg-green-500"
-                                        : "bg-gray-300"
-                                } ${isEnabled ? "animate-pulse" : ""}`}
+                                        ? "bg-emerald-500"
+                                        : "bg-neutral-500",
+                                    isEnabled &&
+                                        "animate-pulse shadow-lg shadow-emerald-500/20"
+                                )}
                             />
-                            <span className="text-sm font-medium text-gray-700">
+                            <span
+                                className={cn(
+                                    "text-sm font-medium transition-colors",
+                                    status === "capturing"
+                                        ? "text-emerald-300"
+                                        : "text-neutral-300"
+                                )}
+                            >
                                 {status === "capturing" ? "Active" : "Standby"}
                             </span>
                         </div>
+
+                        {/* Enhanced Toggle Button */}
                         <button
                             onClick={toggleExtension}
-                            className={`w-14 h-7 rounded-full p-1 transition-colors duration-200 ${
-                                isEnabled ? "bg-blue-600" : "bg-gray-200"
-                            }`}
+                            className={cn(
+                                "w-14 h-7 rounded-full p-1 transition-all duration-300 ease-spring",
+                                "hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-neutral-900",
+                                isEnabled
+                                    ? "bg-gradient-to-r from-cyan-500 to-cyan-400 focus:ring-cyan-500"
+                                    : "bg-neutral-700 focus:ring-neutral-600"
+                            )}
                         >
                             <div
-                                className={`w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-200 flex items-center justify-center ${
+                                className={cn(
+                                    "w-5 h-5 rounded-full bg-white shadow-md transform transition-transform duration-300 ease-spring flex items-center justify-center",
                                     isEnabled
                                         ? "translate-x-7"
-                                        : "translate-x-0"
-                                }`}
+                                        : "translate-x-0",
+                                    "hover:shadow-lg"
+                                )}
                             >
-                                <Power className="w-3 h-3 text-gray-600" />
+                                <Power
+                                    className={cn(
+                                        "w-3 h-3 transition-colors duration-200",
+                                        isEnabled
+                                            ? "text-cyan-500"
+                                            : "text-neutral-400"
+                                    )}
+                                />
                             </div>
                         </button>
                     </div>
 
-                    {/* Stats */}
                     {isEnabled && (
-                        <div className="pt-3 border-t border-gray-50">
-                            <div className="flex items-center space-x-2 text-sm text-gray-600">
-                                <Video className="w-4 h-4" />
-                                <span>Frames captured: </span>
-                                <span className="font-semibold text-gray-900">
-                                    {frameCount}
+                        <div className="pt-4 border-t border-neutral-800">
+                            <div className="flex items-center space-x-2.5 text-sm">
+                                <Video className="w-4 h-4 text-neutral-400" />
+                                <span className="text-neutral-300">
+                                    Frames captured:
+                                </span>
+                                <span className="font-semibold text-white tabular-nums">
+                                    {frameCount.toLocaleString()}
                                 </span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                {/* Error State */}
                 {status === "error" && (
-                    <div className="bg-red-50 border border-red-100 rounded-lg p-3 flex items-center space-x-2">
-                        <AlertCircle className="w-4 h-4 text-red-500" />
-                        <span className="text-sm text-red-600">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3.5 flex items-center space-x-2.5 animate-pulse">
+                        <AlertCircle className="w-4 h-4 text-red-400" />
+                        <span className="text-sm text-red-200 font-medium">
                             Connection Error
                         </span>
                     </div>
                 )}
 
-                {/* Instructions */}
-                <div className="bg-gray-50 rounded-lg p-4">
-                    <p className="text-xs text-gray-600 leading-relaxed">
+                <div className="bg-black/20 backdrop-blur-sm rounded-lg p-4 transition-all duration-200 hover:bg-black/30">
+                    <p className="text-xs text-neutral-300 leading-relaxed">
                         {isEnabled
                             ? "Navigate to any page with video content to start capturing frames automatically."
                             : "Toggle the switch above to enable frame capture."}

@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const PORT = 3001;
 const FRAME_DIR = path.join(__dirname, "frames");
 
 // Create base directory if not exists
@@ -15,7 +15,11 @@ let frameCount = 0;
 const MAX_FRAMES = 500; // Stop if too many frames
 
 app.use(express.json({ limit: "10mb" })); // Support large payloads
-app.use(require("cors")());
+app.use(require("cors")({ origin: "*" }));
+
+app.get("/", (req, res) => {
+    res.send("Frame Extractor Server");
+});
 
 function generateSessionFolder() {
     const sessionFolder = path.join(FRAME_DIR, `session_${Date.now()}`);
@@ -46,7 +50,10 @@ app.post("/save-frame", async (req, res) => {
         // }
 
         if (frameCount >= MAX_FRAMES) {
-            return res.json({ success: false, reason: "Frame limit reached, stopping capture" });
+            return res.json({
+                success: false,
+                reason: "Frame limit reached, stopping capture",
+            });
         }
 
         // lastHash = imgHash; // Update last hash

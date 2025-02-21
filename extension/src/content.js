@@ -2,7 +2,7 @@ let frameIndex = 0;
 let isCapturing = false;
 let captureInterval;
 
-// Listen for messages from popup
+// Listen for messages from the popup (or other parts of the extension)
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "START_CAPTURE") {
         isCapturing = true;
@@ -23,40 +23,16 @@ function startCapture() {
         if (!video || video.readyState < 2) return;
 
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d");
-
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+        const ctx = canvas.getContext("2d");
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
+        // Convert the frame to a JPEG data URL
         const frameData = canvas.toDataURL("image/jpeg");
 
-        fetch("https://63hkpqrh-3000.inc1.devtunnels.ms/save-frame", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: frameData }),
-        })
-            .then((res) => res.json())
-            .then((data) => {
-                if (data.success) {
-                    chrome.runtime.sendMessage({ type: "FRAME_CAPTURED" });
-                } else {
-                    chrome.runtime.sendMessage({
-                        type: "CAPTURE_ERROR",
-                        error: data.reason,
-                    });
-                    isCapturing = false;
-                    clearInterval(captureInterval);
-                }
-            })
-            .catch((err) => {
-                chrome.runtime.sendMessage({
-                    type: "CAPTURE_ERROR",
-                    error: err.message,
-                });
-                isCapturing = false;
-                clearInterval(captureInterval);
-            });
+        // Send the frame data to the background script for processing
+        chrome.runtime.sendMessage({ type: "CAPTURE_FRAME", image: frameData });
 
         frameIndex++;
     }, 1000);
