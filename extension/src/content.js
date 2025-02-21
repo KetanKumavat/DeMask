@@ -1,7 +1,9 @@
 let frameIndex = 0;
+let stopCapture = false;
 
-// Capture frames and send to backend
 function captureFrame() {
+    if (stopCapture) return;
+    
     const video = document.querySelector("video");
     if (!video || video.readyState < 2) return;
 
@@ -14,16 +16,22 @@ function captureFrame() {
 
     const frameData = canvas.toDataURL("image/jpeg");
 
-    // Send frame to backend
     fetch("http://localhost:3000/save-frame", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: frameData, index: frameIndex++ }),
+        body: JSON.stringify({ image: frameData }),
     })
     .then(res => res.json())
-    .then(data => console.log("Frame saved:", data.filePath))
+    .then(data => {
+        if (!data.success) {
+            console.log("Stopping capture:", data.reason);
+            stopCapture = true;
+        }
+    })
     .catch(err => console.error("Error:", err));
+
+    frameIndex++;
 }
 
-// Capture frames every second
+// Start capturing
 setInterval(captureFrame, 1000);
