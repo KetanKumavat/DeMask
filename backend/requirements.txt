@@ -1,0 +1,10 @@
+supabase
+httpx
+uvicorn
+fastapi
+pydantic
+python-dotenv
+tensorflow 
+keras 
+numpy 
+opencv-python
