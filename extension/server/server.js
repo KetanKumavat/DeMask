@@ -6,30 +6,56 @@ const app = express();
 const PORT = 3000;
 const FRAME_DIR = path.join(__dirname, "frames");
 
-// Ensure the frames directory exists
-if (!fs.existsSync(FRAME_DIR)) {
-    fs.mkdirSync(FRAME_DIR, { recursive: true });
+// Create base directory if not exists
+if (!fs.existsSync(FRAME_DIR)) fs.mkdirSync(FRAME_DIR, { recursive: true });
+
+let activeSession = null;
+let lastHash = null; // Used to detect looping
+let frameCount = 0;
+const MAX_FRAMES = 500; // Stop if too many frames
+
+app.use(express.json({ limit: "10mb" })); // Support large payloads
+app.use(require("cors")());
+
+function generateSessionFolder() {
+    const sessionFolder = path.join(FRAME_DIR, `session_${Date.now()}`);
+    fs.mkdirSync(sessionFolder, { recursive: true });
+    return sessionFolder;
 }
 
-app.use(express.json({ limit: "10mb" })); // Allow large image data
-app.use(require("cors")()); // Enable CORS for communication with the extension
+function getImageHash(base64Image) {
+    return base64Image.slice(0, 100); // Extract a portion of the data to compare
+}
 
-// Save frame API
 app.post("/save-frame", async (req, res) => {
     try {
-        const { image, index } = req.body;
+        const { image } = req.body;
         if (!image) return res.status(400).json({ error: "No image data" });
 
-        // Create a session folder inside frames (e.g., frames/session_123/)
-        const sessionFolder = path.join(FRAME_DIR, `session_${Date.now()}`);
-        if (!fs.existsSync(sessionFolder)) {
-            fs.mkdirSync(sessionFolder, { recursive: true });
+        if (!activeSession) {
+            activeSession = generateSessionFolder();
+            frameCount = 0;
+            lastHash = null; // Reset loop detection
         }
 
-        const imgBuffer = Buffer.from(image.split(",")[1], "base64");
-        const filePath = path.join(sessionFolder, `frame_${index}.jpg`);
+        // const imgHash = getImageHash(image);
 
+        // **Check for looping only after the first frame**
+        // if (lastHash !== null && imgHash === lastHash) {
+        //     return res.json({ success: false, reason: "Loop detected, stopping capture" });
+        // }
+
+        if (frameCount >= MAX_FRAMES) {
+            return res.json({ success: false, reason: "Frame limit reached, stopping capture" });
+        }
+
+        // lastHash = imgHash; // Update last hash
+        frameCount++;
+
+        const imgBuffer = Buffer.from(image.split(",")[1], "base64");
+        const filePath = path.join(activeSession, `frame_${frameCount}.jpg`);
         fs.writeFileSync(filePath, imgBuffer);
+
         res.json({ success: true, filePath });
     } catch (error) {
         console.error("Error saving frame:", error);
@@ -37,7 +63,13 @@ app.post("/save-frame", async (req, res) => {
     }
 });
 
-// Start the server
+// Reset session after inactivity
+setInterval(() => {
+    activeSession = null;
+    lastHash = null;
+    frameCount = 0;
+}, 10 * 60 * 1000); // Reset every 10 minutes
+
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
