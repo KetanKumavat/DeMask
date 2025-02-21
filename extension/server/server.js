@@ -1,6 +1,7 @@
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
+const sharp = require("sharp");
 
 const app = express();
 const PORT = 3001;
@@ -10,7 +11,6 @@ const FRAME_DIR = path.join(__dirname, "frames");
 if (!fs.existsSync(FRAME_DIR)) fs.mkdirSync(FRAME_DIR, { recursive: true });
 
 let activeSession = null;
-let lastHash = null; // Used to detect looping
 let frameCount = 0;
 const MAX_FRAMES = 500; // Stop if too many frames
 
@@ -27,27 +27,15 @@ function generateSessionFolder() {
     return sessionFolder;
 }
 
-function getImageHash(base64Image) {
-    return base64Image.slice(0, 100); // Extract a portion of the data to compare
-}
-
 app.post("/save-frame", async (req, res) => {
     try {
-        const { image } = req.body;
+        const { image } = req.body; // Expecting image as Blob
         if (!image) return res.status(400).json({ error: "No image data" });
 
         if (!activeSession) {
             activeSession = generateSessionFolder();
             frameCount = 0;
-            lastHash = null; // Reset loop detection
         }
-
-        // const imgHash = getImageHash(image);
-
-        // **Check for looping only after the first frame**
-        // if (lastHash !== null && imgHash === lastHash) {
-        //     return res.json({ success: false, reason: "Loop detected, stopping capture" });
-        // }
 
         if (frameCount >= MAX_FRAMES) {
             return res.json({
@@ -56,12 +44,17 @@ app.post("/save-frame", async (req, res) => {
             });
         }
 
-        // lastHash = imgHash; // Update last hash
         frameCount++;
 
+        // Convert Base64 to Buffer
         const imgBuffer = Buffer.from(image.split(",")[1], "base64");
+
+        // Compress and save the image using sharp
         const filePath = path.join(activeSession, `frame_${frameCount}.jpg`);
-        fs.writeFileSync(filePath, imgBuffer);
+        await sharp(imgBuffer)
+            .resize(640, 360, { fit: "inside" }) // Resize to optimize
+            .jpeg({ quality: 75 }) // Compress image
+            .toFile(filePath);
 
         res.json({ success: true, filePath });
     } catch (error) {
@@ -73,7 +66,6 @@ app.post("/save-frame", async (req, res) => {
 // Reset session after inactivity
 setInterval(() => {
     activeSession = null;
-    lastHash = null;
     frameCount = 0;
 }, 10 * 60 * 1000); // Reset every 10 minutes
 

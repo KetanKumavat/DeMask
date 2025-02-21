@@ -80,7 +80,7 @@ function startCapture(video) {
         chrome.runtime.sendMessage({ type: "CAPTURE_FRAME", image: frameData });
 
         frameIndex++;
-    }, 1000);
+    }, 3000);
 }
 
 // Detect new videos and trigger processing
@@ -93,9 +93,18 @@ const observer = new MutationObserver(() => {
 
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Also trigger when a video starts playing
 document.addEventListener("play", (event) => {
     if (event.target.tagName === "VIDEO") {
+        isCapturing = true;
         checkAndProcessVideo(event.target);
     }
 }, true);
+
+document.addEventListener("pause", (event) => {
+    if (event.target.tagName === "VIDEO") {
+        isCapturing = false;
+        clearInterval(captureInterval);
+        console.log("Video paused, stopping capture...");
+    }
+}, true);
+
