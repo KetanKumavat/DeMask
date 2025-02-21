@@ -10,7 +10,7 @@
         "service_worker": "background.js"
     },
     "permissions": ["storage", "tabs", "activeTab"],
-    "host_permissions": ["https://*/*"],
+    "host_permissions": ["http://localhost:3001/*", "https://*/*"],
     "content_scripts": [
         {
             "matches": ["https://*/*"],

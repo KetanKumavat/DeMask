@@ -5,6 +5,9 @@
         { "path": "./tsconfig.node.json" }
     ],
     "compilerOptions": {
-        "types": ["node"]
+        "types": ["node"],
+        "allowJs": true,
+        "checkJs": false,
+        "noEmit": true
     }
 }
