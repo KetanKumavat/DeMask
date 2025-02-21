@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Power, Camera, AlertCircle, Video, Settings } from "lucide-react";
-import axios from "axios";
 import { cn } from "./utils.jsx";
 
 const App = () => {
@@ -8,20 +7,7 @@ const App = () => {
     const [status, setStatus] = useState("idle");
     const [frameCount, setFrameCount] = useState(0);
     const [isExtension, setIsExtension] = useState(false);
-    const [showSettings, setShowSettings] = useState(false);
     const [message, setMessage] = useState("");
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get("http://localhost:3001");
-                setMessage(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
-        fetchData();
-    }, []);
 
     useEffect(() => {
         const isRunningAsExtension =
@@ -34,16 +20,36 @@ const App = () => {
                 setFrameCount(result.frameCount || 0);
             });
 
+            console.log("Extension is running");
+            console.log("isEnabled : ", isEnabled);
+
+            // Add listener for video state changes
             chrome.runtime.onMessage.addListener((message) => {
-                if (message.type === "FRAME_CAPTURED") {
-                    setFrameCount((prev) => prev + 1);
+                if (message.type === "STOP_CAPTURE") {
+                    setStatus("idle");
+                    setIsEnabled(false);
+                }
+                if (message.type === "START_CAPTURE") {
                     setStatus("capturing");
-                } else if (message.type === "CAPTURE_ERROR") {
-                    setStatus("error");
+                    setIsEnabled(true);
                 }
             });
         }
     }, []);
+
+    useEffect(() => {
+        if (isExtension) {
+            chrome.storage.local.get(["frameCount"], (result) => {
+                setFrameCount(result.frameCount || 0);
+            });
+
+            chrome.storage.onChanged.addListener((changes) => {
+                if (changes.frameCount) {
+                    setFrameCount(changes.frameCount.newValue);
+                }
+            });
+        }
+    }, [isExtension]);
 
     const toggleExtension = () => {
         const newState = !isEnabled;
@@ -67,14 +73,14 @@ const App = () => {
             {/* Header */}
             <div className="flex justify-center items-center border-b border-neutral-700/50 pb-4">
                 <div className="flex items-center justify-center space-x-2">
-                    <h1 className="text-white text-3xl text-center font-bold tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text text-transparent">
-                        Deepfake ko pakdo
+                    <h1 className="text-white text-3xl text-center font-bold tracking-tight bg-gradient-to-r from-white to-neutral-400 bg-clip-text">
+                        Deepfake Detector
                     </h1>
                 </div>
             </div>
 
             <div className="py-6 space-y-6">
-                {!isExtension && (
+                {isExtension && (
                     <div className="text-xs bg-amber-500/10 border border-amber-500/20 p-3 rounded-lg flex items-center space-x-2 transition-colors animate-pulse">
                         <AlertCircle className="w-4 h-4 text-amber-500" />
                         <span className="text-amber-200">

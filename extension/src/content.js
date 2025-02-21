@@ -3,10 +3,14 @@ let isCapturing = false;
 let captureInterval;
 let currentVideoHash = null;
 
+let activeVideos = new Set();
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "START_CAPTURE") {
         isCapturing = true;
-        startCapture();
+        if (activeVideos.size > 0) {
+            startCapture();
+        }
     } else if (message.type === "STOP_CAPTURE") {
         isCapturing = false;
         if (captureInterval) {
@@ -17,7 +21,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Function to generate a hash for a video
 function generateVideoHash(video) {
-    return `${video.src}-${video.videoWidth}x${video.videoHeight}-${Math.floor(video.duration)}`;
+    return `${video.src}-${video.videoWidth}x${video.videoHeight}-${Math.floor(
+        video.duration
+    )}`;
 }
 
 // Function to check if the video is new and trigger overlay/model
@@ -80,6 +86,11 @@ function startCapture(video) {
         chrome.runtime.sendMessage({ type: "CAPTURE_FRAME", image: frameData });
 
         frameIndex++;
+
+        chrome.storage.local.get("frameCount", (result) => {
+            let newFrameCount = (result.frameCount || 0) + 1;
+            chrome.storage.local.set({ frameCount: newFrameCount });
+        });
     }, 3000);
 }
 
@@ -93,18 +104,29 @@ const observer = new MutationObserver(() => {
 
 observer.observe(document.body, { childList: true, subtree: true });
 
-document.addEventListener("play", (event) => {
-    if (event.target.tagName === "VIDEO") {
-        isCapturing = true;
-        checkAndProcessVideo(event.target);
-    }
-}, true);
+document.addEventListener(
+    "play",
+    (event) => {
+        if (event.target.tagName === "VIDEO") {
+            isCapturing = true;
+            // Notify popup that video is playing
+            chrome.runtime.sendMessage({ type: "START_CAPTURE" });
+            checkAndProcessVideo(event.target);
+        }
+    },
+    true
+);
 
-document.addEventListener("pause", (event) => {
-    if (event.target.tagName === "VIDEO") {
-        isCapturing = false;
-        clearInterval(captureInterval);
-        console.log("Video paused, stopping capture...");
-    }
-}, true);
-
+document.addEventListener(
+    "pause",
+    (event) => {
+        if (event.target.tagName === "VIDEO") {
+            isCapturing = false;
+            clearInterval(captureInterval);
+            // Notify popup that video is paused
+            chrome.runtime.sendMessage({ type: "STOP_CAPTURE" });
+            console.log("Video paused, stopping capture...");
+        }
+    },
+    true
+);
