@@ -5,7 +5,7 @@ const sharp = require("sharp");
 
 const app = express();
 const PORT = 3001;
-const WS_URL = "wss://58f8-123-252-147-173.ngrok-free.app/ml/ws"; 
+const WS_URL = "wss://2e62-123-252-147-173.ngrok-free.app/ml/ws"; 
 
 let ws;
 function connectWebSocket() {
@@ -26,6 +26,24 @@ function connectWebSocket() {
             } else {
                 console.log("Received WebSocket message:", message);
             }
+        } catch (error) {
+            console.error("Error parsing WebSocket message:", error);
+        }
+    });
+
+    ws.on("message", (data) => {
+        try {
+            const message = JSON.parse(data.toString());
+            console.log(message.result);
+        } catch (error) {
+            console.error("Error parsing WebSocket message:", error);
+        }
+    });
+
+    ws.on("message", (data) => {
+        try {
+            const message = JSON.parse(data.toString());
+            console.log(message.final_result);
         } catch (error) {
             console.error("Error parsing WebSocket message:", error);
         }

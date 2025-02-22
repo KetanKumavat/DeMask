@@ -1,3 +1,4 @@
+let ws = new WebSocket("wss://2e62-123-252-147-173.ngrok-free.app/ml/ws"); 
 chrome.runtime.onInstalled.addListener(() => {
     console.log("Auto Frame Extractor Installed!");
     chrome.storage.local.set({
@@ -9,12 +10,35 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onStartup.addListener(() => {
     console.log("Extension Started");
 });
+ws.onmessage = (event) => {
+    try {
+        const message = JSON.parse(event.data);
+        console.log("Received from WebSocket:", message.final_result);
+
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+            if (tabs.length > 0) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    type: "DEEPFAKE_RESULT",
+                    data: message.final_result,
+                });
+            }
+        });
+    } catch (error) {
+        console.error("Error parsing WebSocket message:", error);
+    }
+};
+
 
 chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === "CAPTURE_FRAME") {
         try {
             const { image, timestamp, videoLink, videoHash } = message;
-
+            const [tab] = await chrome.tabs.query({
+                active: true,
+                currentWindow: true,
+            });
+            const currentURL = tab.url;
+            console.log(currentURL)
             if (!image || !timestamp || !videoLink || !videoHash) {
                 sendResponse({ type: "CAPTURE_ERROR", error: "Missing required fields" });
                 return;
@@ -25,7 +49,7 @@ chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ image, timestamp, videoLink, videoHash }),
+                body: JSON.stringify({ image, timestamp, videoLink: currentURL, videoHash }),
             });
 
             const data = await response.json();

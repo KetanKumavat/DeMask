@@ -5,6 +5,15 @@ let currentVideoHash = null;
 
 let activeVideos = new Set();
 
+// Detect new videos and trigger processing
+const observer = new MutationObserver(() => {
+    const video = document.querySelector("video");
+    console.log(video)
+    if (video && video.readyState >= 2) {
+        checkAndProcessVideo(video);
+    }
+});
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.type === "START_CAPTURE") {
         isCapturing = true;
@@ -16,6 +25,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         if (captureInterval) {
             clearInterval(captureInterval);
         }
+    } else if (message.type === "DEEPFAKE_RESULT") {
+        applyOverlayIfFake(message.data, video);
     }
 });
 
@@ -50,28 +61,6 @@ function startCapture(video, videoHash) {
 
         if (!video || video.readyState < 2) return;
 
-        // let overlay = document.querySelector("#video-overlay");
-        // if (!overlay) {
-        //     overlay = document.createElement("div");
-        //     overlay.id = "video-overlay";
-        //     overlay.style.position = "absolute";
-        //     overlay.style.top = "0";
-        //     overlay.style.left = "0";
-        //     overlay.style.width = "100%";
-        //     overlay.style.height = "100%";
-        //     overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
-        //     overlay.style.color = "white";
-        //     overlay.style.display = "flex";
-        //     overlay.style.alignItems = "center";
-        //     overlay.style.justifyContent = "center";
-        //     overlay.style.fontSize = "20px";
-        //     overlay.style.fontWeight = "bold";
-        //     overlay.style.zIndex = "9999";
-        //     overlay.innerText = "Capturing Frames...";
-        //     video.parentElement.style.position = "relative";
-        //     video.parentElement.appendChild(overlay);
-        // }
-
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
@@ -98,13 +87,35 @@ function startCapture(video, videoHash) {
     }, 3000);
 }
 
-// Detect new videos and trigger processing
-const observer = new MutationObserver(() => {
-    const video = document.querySelector("video");
-    if (video && video.readyState >= 2) {
-        checkAndProcessVideo(video);
+function applyOverlayIfFake(finalResult, video) {
+    if (finalResult !== "Fake") return;
+
+    // const video = document.querySelector("video");
+    // console.log(video)
+    if (!video) return;
+
+    let overlay = document.querySelector("#video-overlay");
+    if (!overlay) {
+        overlay = document.createElement("div");
+        overlay.id = "video-overlay";
+        overlay.style.position = "absolute";
+        overlay.style.top = "0";
+        overlay.style.left = "0";
+        overlay.style.width = "100%";
+        overlay.style.height = "100%";
+        overlay.style.background = "rgba(0, 0, 0, 0.5)";
+        overlay.style.color = "white";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.fontSize = "20px";
+        overlay.style.fontWeight = "bold";
+        overlay.style.zIndex = "9999";
+        overlay.innerText = "⚠️ Deepfake Detected!";
+        video.parentElement.style.position = "relative";
+        video.parentElement.appendChild(overlay);
     }
-});
+}
 
 observer.observe(document.body, { childList: true, subtree: true });
 
