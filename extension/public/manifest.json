@@ -4,7 +4,17 @@
     "version": "1.0",
     "description": "Deepfake detection extension",
     "action": {
-        "default_popup": "index.html"
+        "default_popup": "index.html",
+        "default_icon": {
+            "16": "logo-rounded.png",
+            "48": "logo-rounded.png",
+            "128": "logo-rounded.png"
+        }
+    },
+    "icons": {
+        "16": "logo-rounded.png",
+        "48": "logo-rounded.png",
+        "128": "logo-rounded.png"
     },
     "background": {
         "service_worker": "background.js"

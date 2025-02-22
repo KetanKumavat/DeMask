@@ -21,9 +21,15 @@ const Reports = ({ setStep }) => {
         const fetchReportData = async () => {
             try {
                 const response = await axios.get(
-                    "https://58f8-123-252-147-173.ngrok-free.app/deepfake/content"
+                    "https://2e62-123-252-147-173.ngrok-free.app/deepfake/content",
+                    {
+                        headers: {
+                            "ngrok-skip-browser-warning": "true",
+                        },
+                    }
                 );
-                console.log("Report Data:", response);
+
+                console.log("Report Data:", response.data);
                 const data = response.data;
                 const totalScanned = data.total_count || 0;
                 const deepfakesDetected = data.count || 0;
