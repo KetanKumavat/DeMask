@@ -54,27 +54,27 @@ function startCapture(video) {
 
         if (!video || video.readyState < 2) return;
 
-        let overlay = document.querySelector("#video-overlay");
-        if (!overlay) {
-            overlay = document.createElement("div");
-            overlay.id = "video-overlay";
-            overlay.style.position = "absolute";
-            overlay.style.top = "0";
-            overlay.style.left = "0";
-            overlay.style.width = "100%";
-            overlay.style.height = "100%";
-            overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
-            overlay.style.color = "white";
-            overlay.style.display = "flex";
-            overlay.style.alignItems = "center";
-            overlay.style.justifyContent = "center";
-            overlay.style.fontSize = "20px";
-            overlay.style.fontWeight = "bold";
-            overlay.style.zIndex = "9999";
-            overlay.innerText = "Capturing Frames...";
-            video.parentElement.style.position = "relative";
-            video.parentElement.appendChild(overlay);
-        }
+        // let overlay = document.querySelector("#video-overlay");
+        // if (!overlay) {
+        //     overlay = document.createElement("div");
+        //     overlay.id = "video-overlay";
+        //     overlay.style.position = "absolute";
+        //     overlay.style.top = "0";
+        //     overlay.style.left = "0";
+        //     overlay.style.width = "100%";
+        //     overlay.style.height = "100%";
+        //     overlay.style.background = "rgba(0, 0, 0, 0.5)"; // Semi-transparent black
+        //     overlay.style.color = "white";
+        //     overlay.style.display = "flex";
+        //     overlay.style.alignItems = "center";
+        //     overlay.style.justifyContent = "center";
+        //     overlay.style.fontSize = "20px";
+        //     overlay.style.fontWeight = "bold";
+        //     overlay.style.zIndex = "9999";
+        //     overlay.innerText = "Capturing Frames...";
+        //     video.parentElement.style.position = "relative";
+        //     video.parentElement.appendChild(overlay);
+        // }
 
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
