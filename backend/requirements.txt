@@ -9,3 +9,8 @@ keras
 numpy 
 opencv-python
 websockets
+pillow
+torch
+torchvision
+foolbox
+eagerpy
