@@ -15,7 +15,7 @@ class ContentService:
         
     async def update_content_with_scores(self,model:ContentUpdateRequest,video_link:str):
         try:
-            data = await self.ContentUpdateRepository.update_by_columns(column_values={"url":video_link},model=model)
+            data = await self.ContentUpdateRepository.update_by_query("url",video_link,model)
             return data
         except Exception as e:
             return None
