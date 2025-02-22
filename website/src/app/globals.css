@@ -21,7 +21,7 @@ body {
 		--secondary-foreground: 0 0% 9%;
 		--muted: 0 0% 96.1%;
 		--muted-foreground: 0 0% 45.1%;
-		--accent: 0 0% 96.1%;
+		--accent: 338.36 100% 76.08%;
 		--accent-foreground: 0 0% 9%;
 		--destructive: 0 84.2% 60.2%;
 		--destructive-foreground: 0 0% 98%;
@@ -49,7 +49,7 @@ body {
 		--secondary-foreground: 0 0% 98%;
 		--muted: 0 0% 14.9%;
 		--muted-foreground: 0 0% 63.9%;
-		--accent: 0 0% 14.9%;
+		--accent: 338.36 100% 76.08%;
 		--accent-foreground: 0 0% 98%;
 		--destructive: 0 62.8% 30.6%;
 		--destructive-foreground: 0 0% 98%;
@@ -83,5 +83,11 @@ body {
 @keyframes text-reveal {
 	to {
 		background-size: calc(100% + var(--blur)) 100%;
+	}
+}
+
+@keyframes marquee {
+	to {
+		transform: translateX(var(--xTo));
 	}
 }
