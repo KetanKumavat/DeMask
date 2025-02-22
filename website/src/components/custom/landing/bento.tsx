@@ -5,26 +5,12 @@ import FaceMeshRed from "../../../../public/face-mesh-phone-red.webp"
 import FaceMeshGreen from "../../../../public/face-mesh-phone-green.webp"
 import useObserver from "@/hooks/use-observer"
 import { marqueeKeywords } from "@/lib/constants"
-
-function BentoCard({
-	children,
-	className,
-	...props
-}: { children: React.ReactNode } & HTMLAttributes<HTMLDivElement>) {
-	return (
-		<div
-			className={cn("bg-white rounded-[48px] p-12", className)}
-			{...props}
-		>
-			{children}
-		</div>
-	)
-}
+import BentoCard from "@/components/wrappers/bento-card"
 
 function Marquee({ reverse }: { reverse?: boolean }) {
 	return (
 		<div
-			className={`flex overflow-hidden py-4 select-none ${
+			className={`flex gap-2 overflow-hidden py-4 select-none ${
 				reverse ? "pt-2" : "pt-12"
 			}`}
 		>
@@ -32,9 +18,9 @@ function Marquee({ reverse }: { reverse?: boolean }) {
 				<div
 					key={idx}
 					className={cn("flex gap-2", {
-						"[--xTo:-100%] animate-[marquee_40s_linear_infinite]":
+						"[--xTo:calc(-100%_-_8px)] animate-[marquee_10s_linear_infinite]":
 							!reverse,
-						"-translate-x-full [--xTo:0%] animate-[marquee_38s_linear_infinite]":
+						"translate-x-[calc(-100%_-_8px)] [--xTo:0%] animate-[marquee_38s_linear_infinite]":
 							reverse,
 					})}
 				>
@@ -70,7 +56,7 @@ export default function Bento() {
 	const { isVisible, Observer } = useObserver()
 
 	return (
-		<section>
+		<section className="mainBento">
 			<div className="bentoWrapper | max-w-screen-lg mx-auto grid gap-2 grid-cols-2 px-2">
 				<BentoCard className="col-span-2 lg:aspect-[1.55] grid grid-rows-[1fr_auto]">
 					<div className="imagesWrapper | relative grid *:[grid-area:1/-1] place-items-center pb-8 w-full aspect-[1.05] md:aspect-auto">
@@ -128,12 +114,12 @@ export default function Bento() {
 					</h2>
 				</BentoCard>
 				<BentoCard className="grid content-between col-span-2 lg:col-span-1">
-					<h2 className="text-3xl lg:text-6xl font-black italic text-text/20 text-center">
-						Automated Watermarking
+					<h2 className="text-3xl lg:text-6xl font-black italic text-text/20~ text-transparent bg-clip-text bg-gradient-to-tr from-text/20 to-accent text-center">
+						Data Poisoning for AI Disruption
 					</h2>
 					<p className="italic text-lg font-medium text-center">
-						Marks unverified content with a watermark to ensure
-						transparency and accountability.
+						Users can upload videos to poison AI models, preventing
+						the creation of deepfakes.
 					</p>
 				</BentoCard>
 			</div>

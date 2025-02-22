@@ -100,3 +100,9 @@ body {
 		transform: translateX(var(--xTo));
 	}
 }
+
+@keyframes scan {
+	to {
+		top: 80%;
+	}
+}

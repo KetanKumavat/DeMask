@@ -13,7 +13,7 @@ function RevealText({ content }: { content: string }) {
 export default function Info() {
 	return (
 		<section>
-			<div className="infoWrapper | max-w-screen-md mx-auto space-y-24 *:text-6xl pb-24">
+			<div className="infoWrapper | px-2 mt-20 lg:mt-0 max-w-screen-md mx-auto space-y-12 lg:space-y-24 *:text-3xl lg:*:text-6xl pb-24">
 				<RevealText
 					content="Detect deepfakes in real time—spot face distortions, voice
 					mismatches, and frame anomalies."
