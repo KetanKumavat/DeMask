@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Eye, Loader2 } from "lucide-react";
 
 interface VideoData {
     id: number;
@@ -27,7 +27,11 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
     const [data, setData] = useState<VideoData[]>(initialData);
     const [loading, setLoading] = useState<number | null>(null);
 
-    const handleApprove = async (url: string, id: number) => {
+    const handleApprove = async (
+        url: string,
+        id: number,
+        timestamp: Number
+    ) => {
         setLoading(id);
         try {
             const response = await fetch(
@@ -37,7 +41,7 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ url }),
+                    body: JSON.stringify({ url, timestamp }),
                 }
             );
 
@@ -71,6 +75,7 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
                     <TableRow>
                         <TableHead>ID</TableHead>
                         <TableHead>Created At</TableHead>
+                        <TableHead>View Video</TableHead>
                         <TableHead>Prediction</TableHead>
                         <TableHead>Timestamp</TableHead>
                         <TableHead>Status</TableHead>
@@ -82,6 +87,16 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
                         <TableRow key={row.id}>
                             <TableCell>{row.id}</TableCell>
                             <TableCell>{formatDate(row.created_at)}</TableCell>
+                            <TableCell>
+                                <a
+                                    href={row.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="text-blue-500 underline"
+                                >
+                                    <Eye />
+                                </a>
+                            </TableCell>
                             <TableCell>{row.prediction}</TableCell>
                             <TableCell>{row.timestamp}s</TableCell>
                             <TableCell>
@@ -98,7 +113,11 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
                             <TableCell className="text-right">
                                 <Button
                                     onClick={() =>
-                                        handleApprove(row.url, row.id)
+                                        handleApprove(
+                                            row.url,
+                                            row.id,
+                                            row.timestamp
+                                        )
                                     }
                                     disabled={
                                         row.approved || loading === row.id
