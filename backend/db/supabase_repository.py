@@ -119,10 +119,26 @@ class SupabaseRepository(Generic[T, K]):
     async def get_by_query(self, column_name: str, value: Any) -> Optional[K]:
         try:
             supabase=await self.get_client()
-            response = await supabase.table(self.table).select("*").eq(column_name, value).execute()
-            
+            response = await supabase.table(self.table).select("*",count='exact').eq(column_name, value).execute()
+            print(response)
             data = response.data
-            return data[0] if data else None
+            return data if data else None,response.count
+        except Exception as e:
+            print(f"Get Error at get_by_query: {e}")
+            return None
+        
+    async def get_count(self):
+        supabase=await self.get_client()
+        response = await supabase.table(self.table).select('id',count='exact').execute
+        return response.count if response.count else 0
+        
+    
+    async def get_all(self) -> Optional[K]:
+        try:
+            supabase=await self.get_client()
+            response = await supabase.table(self.table).select("*",count='exact').execute()
+            data = response.data
+            return data if data else None,response.count
         except Exception as e:
             print(f"Get Error at get_by_query: {e}")
             return None
@@ -158,7 +174,7 @@ class SupabaseRepository(Generic[T, K]):
             query = await supabase.table(self.table).update(data)
             for column, value in column_values.items():
                 query = query.eq(column, value)
-            response = query.execute()
+            response = await query.execute()
             data = response.data
             return model.model_validate(data[0]) if data else None
         except Exception as e:
