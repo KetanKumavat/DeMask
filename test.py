@@ -3,7 +3,7 @@ import websockets
 import os
 
 async def send_image():
-    uri = "ws://localhost:8001/ml/ws"
+    uri ="ws://3ce5-123-252-147-173.ngrok-free.app/ml/ws"
     
     try:
         async with websockets.connect(uri) as websocket:
