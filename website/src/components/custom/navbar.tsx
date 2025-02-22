@@ -1,5 +1,11 @@
 import React from "react"
-import { Button } from "../ui/button"
+import {
+	SignInButton,
+	SignUpButton,
+	SignedIn,
+	SignedOut,
+	UserButton,
+} from '@clerk/nextjs'
 
 export default function Navbar() {
 	return (
@@ -8,8 +14,15 @@ export default function Navbar() {
 				<img src="/logo.webp" alt="" className="size-14 rounded-full" />
 			</div>
 			<div className="flex gap-4 items-center">
-				<Button>Login</Button>
-				<Button>Signup</Button>
+				<header className="flex justify-end items-center p-4 gap-4 h-16">
+					<SignedOut>
+						<SignInButton mode="modal"/>
+						<SignUpButton mode="modal"/>
+					</SignedOut>
+					<SignedIn>
+						<UserButton showName/>
+					</SignedIn>
+				</header>
 			</div>
 		</header>
 	)

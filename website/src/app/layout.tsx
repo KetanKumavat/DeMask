@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import "./globals.css"
 import RebondGrotesque from "@/lib/fonts"
+import {
+	ClerkProvider,
+} from '@clerk/nextjs'
 
 export const metadata: Metadata = {
 	title: "Create Next App",
@@ -13,12 +16,23 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="en">
-			<body
-				className={`${RebondGrotesque.className} antialiased bg-background text-text`}
-			>
-				{children}
-			</body>
-		</html>
+		<ClerkProvider>
+			<html lang="en">
+				<body
+					className={`${RebondGrotesque.className} antialiased bg-background text-text`}
+				>
+					{/* <header className="flex justify-end items-center p-4 gap-4 h-16">
+						<SignedOut>
+							<SignInButton />
+							<SignUpButton />
+						</SignedOut>
+						<SignedIn>
+							<UserButton />
+						</SignedIn>
+					</header> */}
+					{children}
+				</body>
+			</html>
+		</ClerkProvider>
 	)
 }
