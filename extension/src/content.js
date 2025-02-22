@@ -21,32 +21,28 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 // Function to generate a hash for a video
 function generateVideoHash(video) {
-    return `${video.src}-${video.videoWidth}x${video.videoHeight}-${Math.floor(
-        video.duration
-    )}`;
+    return `${video.src}-${video.videoWidth}x${video.videoHeight}-${Math.floor(video.duration)}`;
 }
 
-// Function to check if the video is new and trigger overlay/model
 function checkAndProcessVideo(video) {
     if (!video || !video.src || video.readyState < 2) return;
 
-    const newVideoHash = generateVideoHash(video);
+    const videoHash = generateVideoHash(video);
 
     chrome.storage.local.get("processedVideos", (data) => {
         let processedVideos = data.processedVideos || {};
 
-        if (!processedVideos[newVideoHash]) {
+        if (!processedVideos[videoHash]) {
             console.log("New video detected, processing...");
-            processedVideos[newVideoHash] = true; // Mark as processed
+            processedVideos[videoHash] = true;
             chrome.storage.local.set({ processedVideos });
 
-            // Start frame capturing for this video
-            startCapture(video);
+            startCapture(video, videoHash);
         }
     });
 }
 
-function startCapture(video) {
+function startCapture(video, videoHash) {
     if (!video) return;
 
     captureInterval = setInterval(() => {
@@ -83,7 +79,15 @@ function startCapture(video) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
         const frameData = canvas.toDataURL("image/jpeg");
-        chrome.runtime.sendMessage({ type: "CAPTURE_FRAME", image: frameData });
+        const timestamp = video.currentTime.toFixed(1); // Capture the frame's timestamp with one decimal
+
+        chrome.runtime.sendMessage({
+            type: "CAPTURE_FRAME",
+            image: frameData,
+            timestamp,
+            videoLink: video.src,
+            videoHash,
+        });
 
         frameIndex++;
 
@@ -109,7 +113,6 @@ document.addEventListener(
     (event) => {
         if (event.target.tagName === "VIDEO") {
             isCapturing = true;
-            // Notify popup that video is playing
             chrome.runtime.sendMessage({ type: "START_CAPTURE" });
             checkAndProcessVideo(event.target);
         }
@@ -123,7 +126,6 @@ document.addEventListener(
         if (event.target.tagName === "VIDEO") {
             isCapturing = false;
             clearInterval(captureInterval);
-            // Notify popup that video is paused
             chrome.runtime.sendMessage({ type: "STOP_CAPTURE" });
             console.log("Video paused, stopping capture...");
         }
