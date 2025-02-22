@@ -38,27 +38,15 @@ async def approve_content(data: ApproveRequest):
     except Exception as e:
         return JSONResponse(status_code=500, content=str(e))
     
-@router.get("/{url}")
-async def get_url_content(url: str):
-    try:
-        print(url)
-        response = await content_service.get_content_by_url(url)
-        if response is None:
-            return JSONResponse(status_code=404, content={
-              "Content": "Not Found"  
-            })    
-        return JSONResponse(status_code=200, content=response)
-    except Exception as e:
-        return JSONResponse(status_code=500, content=str(e))
     
     
-@router.get('/content/deepfake')
-async def get_deepfake_content(url:str):
+@router.get('/greyscale')
+async def get_graysacle_content():
     try:
         response,count= await content_service.get_content('GreyScale')
         return JSONResponse(
             status_code=200,
-            content={"count": count},
+            content={"response":response},
         )
     except Exception as e:
         return JSONResponse(status_code=500, content=str(e))
