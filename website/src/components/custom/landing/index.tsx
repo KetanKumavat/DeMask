@@ -3,6 +3,7 @@ import Navbar from "../navbar"
 import Hero from "./hero"
 import Lenis from "@/components/wrappers/lenis"
 import Info from "./info"
+import Bento from "./bento"
 
 export default function Landing() {
 	return (
@@ -12,6 +13,7 @@ export default function Landing() {
 				<main className="landing | ">
 					<Hero />
 					<Info />
+					<Bento />
 				</main>
 			</div>
 		</Lenis>
