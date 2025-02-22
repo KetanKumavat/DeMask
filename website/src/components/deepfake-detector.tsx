@@ -27,7 +27,21 @@ const seededRandom = (seed: number) => {
 
 export default function DeepfakeDetector() {
     const [video, setVideo] = useState<File | null>(null);
-    const [results, setResults] = useState<any[]>([]);
+    interface Result {
+        timestamp: string;
+        modelResult: string;
+        modelOutput: number;
+        reasonsToFlag: string[];
+        confidenceScore: number;
+        technicalDetails: {
+            frameQuality: number;
+            processingTime: number;
+            analysisMethod: string;
+            resolutionScore: number;
+        };
+    }
+
+    const [results, setResults] = useState<Result[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -173,7 +187,7 @@ export default function DeepfakeDetector() {
                     <Progress
                         value={progress}
                         className="w-full h-2 bg-blue-200"
-                        indicator="bg-blue-600"
+                        // indicator="bg-blue-600"
                     />
                 </div>
             )}

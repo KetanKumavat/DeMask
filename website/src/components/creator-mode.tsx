@@ -4,10 +4,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Upload, Play, Download } from "lucide-react";
+import Image from "next/image";
 
 export default function CreatorMode() {
+    interface Result {
+        score: number;
+        label: string;
+    }
     const [image, setImage] = useState<File | null>(null);
-    const [results, setResults] = useState<any[]>([]);
+
+    const [results, setResults] = useState<Result[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [processedFile, setProcessedFile] = useState<string | null>(null);
@@ -94,7 +100,7 @@ export default function CreatorMode() {
             <div className="flex flex-col md:flex-row gap-8">
                 <div className="w-full md:w-1/2">
                     {imagePreview && (
-                        <img
+                        <Image
                             src={imagePreview}
                             alt="Original"
                             className="w-full rounded-lg shadow-lg"
@@ -103,7 +109,7 @@ export default function CreatorMode() {
                 </div>
                 <div className="w-full md:w-1/2">
                     {processedFile && (
-                        <img
+                        <Image
                             src={processedFile}
                             alt="Processed"
                             className="w-full rounded-lg shadow-lg"

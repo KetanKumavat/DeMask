@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { LoginModal } from "../login-modal";
 import { SignupModal } from "../signup-modal";
 import { useAuth } from "@/app/context/auth-context";
+import Image from "next/image";
 
 export default function Navbar() {
     const { user, logout } = useAuth();
@@ -25,7 +26,7 @@ export default function Navbar() {
         <>
             <header className="z-[9999] h-fit sticky top-0 flex justify-between px-6 py-6 isolate | before:absolute before:inset-0 before:-z-10 before:backdrop-blur-sm before:[mask-image:linear-gradient(black_25%,transparent)]">
                 <div className="italic font-extrabold">
-                    <img
+                    <Image
                         src="/logo.webp"
                         alt=""
                         className="size-14 rounded-full"

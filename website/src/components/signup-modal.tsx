@@ -47,7 +47,7 @@ export function SignupModal({
         try {
             await signup(formData);
             onClose();
-        } catch (err) {
+        } catch {
             setError("Failed to create account");
         }
     };

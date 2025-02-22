@@ -30,7 +30,7 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
     const handleApprove = async (
         url: string,
         id: number,
-        timestamp: Number
+        timestamp: number
     ) => {
         setLoading(id);
         try {
@@ -57,7 +57,7 @@ export function ModeratorTable({ initialData }: { initialData: VideoData[] }) {
             );
 
             toast("Video has been approved successfully.");
-        } catch (error) {
+        } catch {
             toast("Failed to approve video. Please try again.");
         } finally {
             setLoading(null);
