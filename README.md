@@ -6,6 +6,19 @@ A real-time deepfake detection browser extension powered by AI.
 
 Demask is a browser extension that detects deepfake videos in real-time while you browse the web. Using advanced deep learning techniques, Demask analyzes video frames to identify manipulated content and alerts users when deepfakes are detected.
 
+## Demo
+
+<p align="center">
+  <a href="https://www.youtube.com/watch?v=7D33ejPL3Bw">
+    <img src="https://img.youtube.com/vi/7D33ejPL3Bw/0.jpg" alt="DeMask Demo">
+  </a>
+</p>
+
+<p align="center">
+  Watch our demonstration video <a href="https://www.youtube.com/watch?v=7D33ejPL3Bw">here</a> to see DeMask in action.
+</p>
+
+
 ## Architecture
 
 The project consists of three main components:
